@@ -1,7 +1,9 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:prominent/firebase/auth.dart';
 import 'package:prominent/models/project.dart';
+import 'package:prominent/screens/project_details.dart';
+import 'package:prominent/screens/register_project.dart';
 
 class ProjecList extends StatefulWidget {
   const ProjecList({Key? key}) : super(key: key);
@@ -23,20 +25,22 @@ class _ProjectListState extends State<ProjecList> {
   */
   List<Project> _projects = [];
   Future<void> fetchProjectList() async {
-    List<Project> _loadedProjects = [];
+    List<Project> loadedProjects = [];
     try {
-      var data = await FirebaseFirestore.instance.collection("Items").get();
+      var data = await FirebaseFirestore.instance.collection("projects").get();
       for (int i = 0; i < data.docs.length; i++) {
-        Project project = Project(
-          title: data.docs[i].data()['title'],
-          description: data.docs[i].data()['description'],
-          // projectTimeLine: data.docs[i].data()['projectTimeLine']
-        );
-        _loadedProjects.add(project);
+        if (data.docs[i].data()['user'] == Auth().currentUser?.uid) {
+          Project project = Project(
+            title: data.docs[i].data()['title'],
+            description: data.docs[i].data()['description'],
+            // projectTimeLine: data.docs[i].data()['projectTimeLine']
+          );
+          loadedProjects.add(project);
+        }
       }
 
       setState(() {
-        _projects = _loadedProjects;
+        _projects = loadedProjects;
         _isLoading = false;
       });
     } catch (error) {
@@ -56,7 +60,22 @@ class _ProjectListState extends State<ProjecList> {
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _projects.isEmpty
-                ? const Center(child: Text('No items added yet.'))
+                ? Center(
+                    child: Row(
+                    children: [
+                      const Text('No project added yet.'),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const RegisterProject(),
+                            ));
+                          },
+                          child: Text(
+                            'Add One!',
+                            style: Theme.of(context).textTheme.displayLarge,
+                          ))
+                    ],
+                  ))
                 : ListView.builder(
                     itemCount: _projects.length,
                     itemBuilder: (context, index) {
@@ -66,12 +85,12 @@ class _ProjectListState extends State<ProjecList> {
                             vertical: 8, horizontal: 5),
                         child: ListTile(
                           onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //       builder: (context) =>
-                            //           JoinEvent(_projects[index])),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ProjectDetail(
+                                      selectedProject: _projects[index])),
+                            );
                           },
                           //specify height
                           //source: https://stackoverflow.com/questions/53071451/how-to-specify-listtile-height-in-flutter
@@ -86,15 +105,16 @@ class _ProjectListState extends State<ProjecList> {
                             "${_projects[index].description}}",
                             style: const TextStyle(color: Colors.white),
                           ),
-                          trailing: const Text("Hello"
-                              // DateFormat()
-                              //     .add_yMd()
-                              //     .format(_projects[index].),
-                              // style: const TextStyle(
-                              //     fontWeight: FontWeight.bold,
-                              //     fontSize: 14,
-                              //     color: Colors.red),
-                              ),
+                          trailing:
+                              Text('${_projects[index].calculateProgression()}%'
+                                  // DateFormat()
+                                  //     .add_yMd()
+                                  //     .format(_projects[index].),
+                                  // style: const TextStyle(
+                                  //     fontWeight: FontWeight.bold,
+                                  //     fontSize: 14,
+                                  //     color: Colors.red),
+                                  ),
                         ),
                       );
                     }));

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:prominent/firebase/auth.dart';
 import 'package:prominent/screens/register_project.dart';
 import 'package:prominent/screens/project_list.dart';
+import 'package:prominent/screens/setting.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -17,11 +18,8 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _pages = <Widget>[
     ProjecList(),
     RegisterProject(),
+    Setting(),
   ];
-
-  Future<void> signOut() async {
-    await Auth().signOut();
-  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -40,6 +38,7 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.checklist), label: 'Projects'),
           BottomNavigationBarItem(icon: Icon(Icons.add_task), label: 'Add'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings),label: 'Settings')
         ],
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -47,9 +46,6 @@ class _HomePageState extends State<HomePage> {
             _selectedIndex = index;
           });
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => FirebaseAuth.instance.signOut(),
       ),
     );
   }

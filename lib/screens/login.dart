@@ -67,14 +67,15 @@ class _LogInState extends State<LogIn> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Image.asset("assets/images/PROMinenT Logo.png",width: 250,),
               const SizedBox(
-                height: 40,
+                height: 35,
               ),
               TextFormField(
                 controller: emailController,
@@ -149,9 +150,9 @@ class _LogInState extends State<LogIn> {
                   size: 30,
                 ),
                 onPressed: _logIn,
-                label: Text(
+                label: const Text(
                   'Log In',
-                  style: Theme.of(context).textTheme.displayLarge,
+                  style: TextStyle(color: Colors.white),
                 ),
               )
             ],

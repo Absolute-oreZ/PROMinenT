@@ -13,7 +13,7 @@ Future main() async {
   runApp(const PROMinenT());
 }
 
-final navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
 class PROMinenT extends StatelessWidget {
   const PROMinenT({Key? key}) : super(key: key);
@@ -25,14 +25,15 @@ class PROMinenT extends StatelessWidget {
       title: 'PROMinenT',
       navigatorKey: navigatorKey,
       theme: ThemeData(
+          primarySwatch: Colors.indigo,
           colorScheme: const ColorScheme.dark(),
           primaryColorDark: const Color.fromRGBO(52, 53, 65, 1),
           fontFamily: 'Roboto',
-          iconTheme: const IconThemeData(color: Colors.white,size: 30),
+          iconTheme: const IconThemeData(color: Colors.white, size: 30),
           textTheme: const TextTheme(
               displayLarge: TextStyle(color: Colors.white, fontSize: 22),
-              displayMedium: TextStyle(color: Colors.white12, fontSize: 16),
-              displaySmall: TextStyle(color: Colors.white24, fontSize: 12))),
+              displayMedium: TextStyle(color: Colors.white, fontSize: 16),
+              displaySmall: TextStyle(color: Colors.white, fontSize: 12))),
       //log in with firebase authentication
       /***************************************************************************************
       *    Title        : Firebase Authentication LogIn
@@ -53,9 +54,9 @@ class PROMinenT extends StatelessWidget {
               child: Text("Something is wrong!"),
             );
           } else if (snapshot.hasData) {
-            return HomePage();
+            return const HomePage();
           } else {
-            return LogIn();
+            return const LogIn();
           }
         },
       ),
