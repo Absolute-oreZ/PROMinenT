@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "145266609486",
+    "project_id": "prominent-ch03",
+    "storage_bucket": "prominent-ch03.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145266609486:android:04f3e815d6f66a2a98221f",
+        "android_client_info": {
+          "package_name": "com.example.prominent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjUFvq77VIuTt8tfzFaA3SNSEnYsu8gO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
