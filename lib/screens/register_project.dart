@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prominent/firebase/auth.dart';
 import 'package:prominent/screens/homepage.dart';
+import 'package:uuid/uuid.dart';
 
 class RegisterProject extends StatefulWidget {
   const RegisterProject({Key? key}) : super(key: key);
@@ -15,15 +16,16 @@ class _RegisterProjectState extends State<RegisterProject> {
   final projectDescriptionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  Future<void> addProject(
-    String title,
-    String description,
-  ) {
+  Future<void> addProject(String title, String description) async {
     CollectionReference projects =
         FirebaseFirestore.instance.collection('projects');
 
-    return projects
-        .add({
+    String projectId = const Uuid().v4(); // Generate a unique ID
+
+    projects
+        .doc(projectId)
+        .set({
+          'project_id': projectId, // Save the project ID
           'user': Auth().currentUser?.uid,
           'title': title,
           'description': description,

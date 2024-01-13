@@ -1,39 +1,75 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:prominent/firebase/auth.dart';
-import 'package:prominent/models/project.dart';
-import 'package:uuid/uuid.dart';
+import 'package:prominent/models/activity.dart';
 
-class RegisterActivity extends StatefulWidget {
-  const RegisterActivity({Key? key, required this.project}) : super(key: key);
+class EditActivity extends StatefulWidget {
+  const EditActivity({Key? key, required this.act}) : super(key: key);
 
-  final Project project;
+  final Activity act;
 
   @override
-  _RegisterActivityState createState() => _RegisterActivityState();
+  _EditActivityState createState() => _EditActivityState();
 }
 
-class _RegisterActivityState extends State<RegisterActivity> {
-  final TextEditingController actTitleController = TextEditingController();
-  final TextEditingController actDescriptionController = TextEditingController();
+class _EditActivityState extends State<EditActivity> {
+  late TextEditingController actTitleController;
+  late TextEditingController actDescriptionController;
+  late TextEditingController statusController;
   late DateTime startDate = DateTime.now();
   late DateTime endDate = DateTime.now();
-  late String strStrDate;
-  late String strEndDate;
-  TextEditingController statusController = TextEditingController();
-  String selectedStatus = 'New';
   final _formKey = GlobalKey<FormState>();
-  final List<String> statusList = ['New', 'On Hold', 'In Progress', 'Completed'];
+  String status = 'New';
+  final List<String> statusList = [
+    'New',
+    'On Hold',
+    'In Progress',
+    'Completed'
+  ];
+
+  Future<void> updateActivityDetail(
+    String documentID,
+    String newTitle,
+    String newDescription,
+    String newStrStrdate,
+    String newStrEndDate,
+    String newStatus,
+  ) async {
+    CollectionReference activities =
+        FirebaseFirestore.instance.collection('activities');
+
+    // Check if the activity ID exists in the Firestore database
+    DocumentSnapshot doc = await activities.doc(documentID).get();
+    if (doc.exists) {
+      // If the activity ID exists, update the fields in the document
+      return activities
+          .doc(documentID)
+          .update({
+            'activity title': newTitle,
+            'activity description': newDescription,
+            'start date': newStrStrdate,
+            'end date': newStrEndDate,
+            'status': newStatus
+          })
+          .then((value) => print("Activity updated successfully!"))
+          .catchError((error) => print("Failed to update activity: $error"));
+    } else {
+      // If the activity ID doesn't exist, log an error message
+      print(
+          "Failed to update activity: The specified activity ID $documentID dont exist in the Firestore database.");
+    }
+  }
 
   void _startDatePicker() {
     showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    ).then((pickedDate) {
-      if (pickedDate == null) return;
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2100))
+        .then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
 
       setState(() {
         startDate = pickedDate;
@@ -43,46 +79,19 @@ class _RegisterActivityState extends State<RegisterActivity> {
 
   void _endDatePicker() {
     showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    ).then((pickedDate) {
-      if (pickedDate == null) return;
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2100))
+        .then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
 
       setState(() {
         endDate = pickedDate;
       });
     });
-  }
-
-  Future<void> addActivity(
-    String title,
-    String description,
-    String strStrdate,
-    String strEndDate,
-    String status,
-    Project project,
-  ) async {
-    CollectionReference activities =
-        FirebaseFirestore.instance.collection('activities');
-
-    String documentID = const Uuid().v4();
-
-    activities
-        .doc(documentID)
-        .set({
-          'document ID': documentID,
-          'user': Auth().currentUser?.uid,
-          'project': project.title,
-          'activity title': title,
-          'activity description': description,
-          'start date': strStrdate,
-          'end date': strEndDate,
-          'status': status,
-        })
-        .then((value) => print("Activity added successfully!"))
-        .catchError((error) => print("Failed to add activity: $error"));
   }
 
   @override
@@ -94,11 +103,20 @@ class _RegisterActivityState extends State<RegisterActivity> {
   }
 
   @override
+  void initState() {
+    Activity act = widget.act;
+    super.initState();
+    actTitleController = TextEditingController(text: act.taskTitle);
+    actDescriptionController = TextEditingController(text: act.taskDesc);
+    statusController = TextEditingController(text: act.status);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Project project = widget.project;
+    Activity selectedAct = widget.act;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register Activity'),
+        title: const Text('Edit Activity'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -162,19 +180,19 @@ class _RegisterActivityState extends State<RegisterActivity> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    addActivity(
+                    updateActivityDetail(
+                      selectedAct.docID,
                       actTitleController.text,
                       actDescriptionController.text,
                       DateFormat.yMd().format(startDate),
                       DateFormat.yMd().format(endDate),
-                      selectedStatus,
-                      project,
+                      status,
                     );
 
                     Navigator.of(context).pop();
                   }
                 },
-                child: const Text('Register Activity'),
+                child: const Text('Edit Activity'),
               ),
             ],
           ),
@@ -220,7 +238,7 @@ class _RegisterActivityState extends State<RegisterActivity> {
           children: [
             const Icon(Icons.arrow_drop_down),
             const SizedBox(width: 8),
-            Text(selectedStatus),
+            Text(status),
           ],
         ),
       ),
@@ -241,8 +259,8 @@ class _RegisterActivityState extends State<RegisterActivity> {
                   title: Text(statusList[index]),
                   onTap: () {
                     setState(() {
-                      selectedStatus = statusList[index];
-                      statusController.text = selectedStatus;
+                      status = statusList[index];
+                      statusController.text = status;
                     });
                     Navigator.pop(context);
                   },

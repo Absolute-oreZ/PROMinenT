@@ -4,6 +4,7 @@ import 'package:prominent/firebase/auth.dart';
 import 'package:prominent/models/activity.dart';
 import 'package:prominent/models/project.dart';
 import 'package:prominent/screens/register_activity.dart';
+import 'package:prominent/screens/task_timeline_tile.dart';
 
 class ProjectDetail extends StatefulWidget {
   const ProjectDetail({
@@ -22,25 +23,43 @@ class _ProjectDetail extends State<ProjectDetail> {
   Future<void> fetchActivities() async {
     Project selectedProject = widget.selectedProject;
     List<Activity> loadedActivities = [];
+
     try {
-      var data =
-          await FirebaseFirestore.instance.collection("activities").get();
-      for (int i = 0; i < data.docs.length; i++) {
-        // Check if the fetched activity is related to the selected project
-        if (data.docs[i].data()['user'] == Auth().currentUser?.uid &&
-            data.docs[i].data()['project'] == selectedProject.title) {
+      var currentUser = Auth().currentUser;
+
+      if (currentUser != null) {
+        // Check if the current user is an admin
+        bool isAdmin = currentUser.email?.contains("admin") ?? false;
+
+        var data;
+        if (isAdmin) {
+          // If admin, fetch all activities
+          data = await FirebaseFirestore.instance
+              .collection("activities")
+              .where('project', isEqualTo: selectedProject.title)
+              .get();
+        } else {
+          // If not admin, fetch activities for the current user
+          data = await FirebaseFirestore.instance
+              .collection("activities")
+              .where('user', isEqualTo: currentUser.uid)
+              .where('project', isEqualTo: selectedProject.title)
+              .get();
+        }
+
+        for (var doc in data.docs) {
           Activity act = Activity(
-            taskTitle: data.docs[i].data()['activity title'],
-            taskDesc: data.docs[i].data()['activity description'],
-            start: data.docs[i].data()['start date'],
-            end: data.docs[i].data()['end date'],
-            status: data.docs[i].data()['status'],
+            docID: doc.id,
+            taskTitle: doc.data()['activity title'],
+            taskDesc: doc.data()['activity description'],
+            start: doc.data()['start date'],
+            end: doc.data()['end date'],
+            status: doc.data()['status'],
           );
           loadedActivities.add(act);
         }
       }
 
-      // Update the selected project's activities directly
       setState(() {
         selectedProject.activities = loadedActivities;
         _isLoading = false;
@@ -59,8 +78,12 @@ class _ProjectDetail extends State<ProjectDetail> {
   @override
   Widget build(BuildContext context) {
     Project selectedProject = widget.selectedProject;
+    setState(() {
+      fetchActivities();
+    });
     return Scaffold(
-      body: Padding(
+      body: Container(
+        height: 800,
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 50),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -77,29 +100,37 @@ class _ProjectDetail extends State<ProjectDetail> {
               selectedProject.description,
               style: Theme.of(context).textTheme.displayMedium,
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 30,),
             //display a list of activities
             Expanded(
-              child: selectedProject.activities.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No activities yet!',
-                        style: Theme.of(context).textTheme.displayLarge,
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: selectedProject.activities.length,
-                      itemBuilder: (context, index) {
-                        var activity = selectedProject.activities[index];
-                        return ListTile(
-                          title: Text(activity.taskTitle),
-                          subtitle: Text(activity.taskDesc),
-                        );
-                      },
-                    ),
-            )
+                child: selectedProject.activities.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No activities yet!',
+                          style: Theme.of(context).textTheme.displayLarge,
+                        ),
+                      )
+                    : SizedBox(
+                        height: 40,
+                        child: ListView.builder(
+                          itemCount: selectedProject.activities.length,
+                          itemBuilder: (context, index) {
+                            return TaskTimelineTile(
+                              isFirst: index == 0 ? true : false,
+                              isLast:
+                                  index == selectedProject.activities.length - 1
+                                      ? true
+                                      : false,
+                              isPast:
+                                  selectedProject.activities[index].status ==
+                                          'Completed'
+                                      ? true
+                                      : false,
+                              act: selectedProject.activities[index],
+                            );
+                          },
+                        ),
+                      ))
           ],
         ),
       ),
@@ -109,6 +140,7 @@ class _ProjectDetail extends State<ProjectDetail> {
               builder: (context) =>
                   RegisterActivity(project: selectedProject)));
         },
+        tooltip: 'Add New Activity',
         child: const Icon(
           Icons.add,
           size: 30,

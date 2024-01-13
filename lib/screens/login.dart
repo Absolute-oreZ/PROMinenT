@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({Key? key}) : super(key: key);
-  
+
   @override
   _LogInState createState() => _LogInState();
 }
@@ -17,18 +17,9 @@ class _LogInState extends State<LogIn> {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
-
     super.dispose();
   }
 
-  //to validate email
-  /*
-  *    Title        : EmailValidator
-  *    Author       : Airon Tark,Philippe Fanaro
-  *    Date         : 7/1/2024
-  *    Code version : 1.0
-  *    Availability : https://stackoverflow.com/questions/16800540/how-should-i-check-if-the-input-is-an-email-address-in-flutter
-  */
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter an email address';
@@ -40,88 +31,96 @@ class _LogInState extends State<LogIn> {
       return 'Enter a valid email address';
     }
 
-    return null; // Return null if the validation succeeds
+    return null;
   }
 
-  Future _logIn() async {
+  Future<void> _logIn(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      // showDialog(
-      //   context: context,
-      //   barrierDismissible: false,
-      //   builder: (context) => const Center(
-      //         child: CircularProgressIndicator(),
-      //       ));
-
       try {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-            email: emailController.text.trim(),
-            password: passwordController.text.trim());
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
       } on FirebaseAuthException catch (e) {
-        print(e);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.message!,
+              style: TextStyle(fontSize: 16),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-      // navigatorKey.currentState!.popUntil((route) => route.isCurrent);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image.asset("assets/images/PROMinenT Logo.png",width: 250,),
-              const SizedBox(
-                height: 35,
-              ),
-              TextFormField(
-                controller: emailController,
-                cursorColor: Colors.white,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  icon: const Icon(
-                    Icons.email,
-                    size: 30,
-                    color: Colors.white,
-                  ),
-                  labelText: 'Email',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  hintText: 'Enter your email',
-                  hintStyle: Theme.of(context).textTheme.bodyMedium,
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      width: 1,
-                      color: Color.fromRGBO(206, 212, 221, 1),
-                      style: BorderStyle.solid,
-                    ),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.black, Colors.grey],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(
+                  "assets/images/PROMinenT Logo.png",
+                  width: 250,
                 ),
-                validator: (value) => _validateEmail(value),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
+                const SizedBox(height: 50),
+                TextFormField(
+                  controller: emailController,
+                  cursorColor: Colors.white,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.email,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: Colors.white, fontSize: 20),
+                    hintText: 'Enter your email',
+                    hintStyle: TextStyle(color: Colors.white, fontSize: 18),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: Color.fromRGBO(206, 212, 221, 1),
+                        style: BorderStyle.solid,
+                      ),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                  ),
+                  validator: (value) => _validateEmail(value),
+                ),
+                const SizedBox(height: 30),
+                TextFormField(
                   controller: passwordController,
                   cursorColor: Colors.white,
                   textInputAction: TextInputAction.next,
                   obscureText: true,
                   decoration: InputDecoration(
-                    icon: const Icon(
-                      Icons.password,
+                    prefixIcon: Icon(
+                      Icons.lock,
                       size: 30,
                       color: Colors.white,
                     ),
                     labelText: 'Password',
-                    labelStyle: Theme.of(context).textTheme.bodyMedium,
+                    labelStyle: TextStyle(color: Colors.white, fontSize: 20),
                     hintText: 'Enter your password',
-                    hintStyle: Theme.of(context).textTheme.bodyMedium,
+                    hintStyle: TextStyle(color: Colors.white, fontSize: 18),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                         width: 1,
                         color: Color.fromRGBO(206, 212, 221, 1),
                         style: BorderStyle.solid,
@@ -131,31 +130,39 @@ class _LogInState extends State<LogIn> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      const TextStyle(
-                          color: Colors.red, fontWeight: FontWeight.bold);
                       return 'Required!';
                     }
                     return null;
-                  }),
-              const SizedBox(
-                height: 30,
-              ),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
+                  },
                 ),
-                icon: const Icon(
-                  Icons.lock_open,
-                  color: Colors.white,
-                  size: 30,
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: () => _logIn(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.lock_open,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Log In',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                  ),
                 ),
-                onPressed: _logIn,
-                label: const Text(
-                  'Log In',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
