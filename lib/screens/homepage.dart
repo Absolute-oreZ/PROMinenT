@@ -30,6 +30,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('PROMinenT'),
+        foregroundColor: Colors.white,
+      ),
       body: Center(
         child: _pages.elementAt(_selectedIndex),
       ),

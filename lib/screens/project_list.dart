@@ -165,8 +165,10 @@ class _ProjectListState extends State<ProjecList> {
                             ? IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  deleteProject(
-                                      context, _projects[index].projectId);
+                                  _confirmDeleteProject(
+                                    context,
+                                    _projects[index].projectId,
+                                  );
                                 },
                               )
                             : const Icon(Icons.forward),
@@ -180,6 +182,39 @@ class _ProjectListState extends State<ProjecList> {
   bool isAdmin() {
     var currentUser = Auth().currentUser;
     return currentUser?.email?.contains("admin") ?? false;
+  }
+
+  Future<void> _confirmDeleteProject(
+      BuildContext context, String projectId) async {
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm Deletion"),
+          content: Text("Are you sure you want to delete this project?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pop(false); // User does not want to delete
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User confirms deletion
+              },
+              child: Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete ?? false) {
+      // User confirmed deletion, proceed with the deleteProject function
+      deleteProject(context, projectId);
+    }
   }
 
   Future<void> deleteProject(BuildContext context, String projectId) async {

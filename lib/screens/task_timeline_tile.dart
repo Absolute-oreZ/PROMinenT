@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prominent/components/activity_card.dart';
 import 'package:prominent/screens/edit_activity.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -13,12 +13,12 @@ class TaskTimelineTile extends StatelessWidget {
   final Activity act;
 
   const TaskTimelineTile({
-    super.key,
+    Key? key,
     required this.isFirst,
     required this.isLast,
     required this.isPast,
     required this.act,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class TaskTimelineTile extends StatelessWidget {
             if (isAdmin)
               GestureDetector(
                 onTap: () {
-                  deleteActivity(context, act.docID);
+                  _confirmDeleteActivity(context, act.docID);
                 },
                 child: const Icon(Icons.delete),
               ),
@@ -64,6 +64,39 @@ class TaskTimelineTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteActivity(
+      BuildContext context, String docID) async {
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm Deletion"),
+          content: Text("Are you sure you want to delete this activity?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context)
+                    .pop(false); // User does not want to delete
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User confirms deletion
+              },
+              child: Text("Delete"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete ?? false) {
+      // User confirmed deletion, proceed with the deleteActivity function
+      deleteActivity(context, docID);
+    }
   }
 
   Future<void> deleteActivity(BuildContext context, String docID) async {

@@ -103,7 +103,7 @@ class _LogInState extends State<LogIn> {
                   ),
                   validator: (value) => _validateEmail(value),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 0),
                 TextFormField(
                   controller: passwordController,
                   cursorColor: Colors.white,

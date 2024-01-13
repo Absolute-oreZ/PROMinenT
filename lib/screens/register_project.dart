@@ -49,8 +49,11 @@ class _RegisterProjectState extends State<RegisterProject> {
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Image.asset(
+                "assets/images/PROMinenT Logo.png",
+                width: 200,
+              ),
               const SizedBox(
                 height: 40,
               ),
