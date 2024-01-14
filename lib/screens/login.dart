@@ -77,7 +77,7 @@ class _LogInState extends State<LogIn> {
                   "assets/images/PROMinenT Logo.png",
                   width: 250,
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: emailController,
                   cursorColor: Colors.white,
@@ -103,7 +103,7 @@ class _LogInState extends State<LogIn> {
                   ),
                   validator: (value) => _validateEmail(value),
                 ),
-                const SizedBox(height: 0),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: passwordController,
                   cursorColor: Colors.white,
@@ -135,7 +135,7 @@ class _LogInState extends State<LogIn> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 ElevatedButton(
                   onPressed: () => _logIn(context),
                   child: Padding(

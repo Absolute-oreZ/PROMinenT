@@ -4,6 +4,7 @@ import 'package:prominent/firebase/auth.dart';
 import 'package:prominent/models/activity.dart';
 import 'package:prominent/models/project.dart';
 import 'package:prominent/screens/project_details.dart';
+import 'package:prominent/screens/register_project.dart';
 
 class ProjecList extends StatefulWidget {
   const ProjecList({Key? key}) : super(key: key);
@@ -96,11 +97,19 @@ class _ProjectListState extends State<ProjecList> {
           ? const Center(child: CircularProgressIndicator())
           : _projects.isEmpty
               ? Center(
-                  child: Row(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Text('No project added yet.'),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterProject(),
+                              ));
+                        },
                         style: ElevatedButton.styleFrom(
                           elevation: 5,
                           primary: Colors.blue[800],
